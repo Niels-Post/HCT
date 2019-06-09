@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.13)
+
+set(WSL_HOMEDIR "C:/Users/niels/Development/WSL_HWLib")
+
+include(${WSL_HOMEDIR}/hwlib/HWLIB_Target.cmake)
+
+hwlib_load_auto(${CMAKE_CURRENT_SOURCE_DIR}/Week_5 HWLIB_TARGET_arduino_due arduino_due /dev/ttyS3)
