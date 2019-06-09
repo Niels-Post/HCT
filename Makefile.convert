@@ -1,0 +1,43 @@
+#############################################################################
+#
+# Project Makefile
+#
+# (c) Wouter van Ooijen (www.voti.nl) 2016
+#
+# This file is in the public domain.
+#
+#############################################################################
+
+# source files in this project (main.cpp is automatically assumed)
+SOURCES := ${MAKE_SOURCES}
+
+# header files in this project
+HEADERS :=
+
+# other places to look for files for this project
+SEARCH  :=
+TARGET  := ${BMPTK_TARGET}
+
+${MAKE_SERIAL_PORT}
+
+${MAKE_CONSOLE_BAUDRATE}
+${MAKE_CPP_FLAGS}
+${CATCH2_INCLUDE}
+
+STM32_CLI := "/mnt/c/Program Files (x86)/STMicroelectronics/STM32 ST-LINK Utility/ST-LINK Utility/ST-LINK_CLI.exe"
+
+RUN_PAUSE := echo "Run Complete"
+DUE_BOOTMODE := cmd.exe /c @mode com3:1200
+
+# set RELATIVE to the next higher directory
+# and defer to the appropriate Makefile.* there
+RELATIVE := ..
+
+HWLIB             ?= $(HOME)/hwlib
+include $(HWLIB)/makefile.inc
+
+BMPTK             ?= $(HOME)/bmptk
+include $(BMPTK)/Makefile.inc
+
+debugtarget:
+	$(info    $(DEFINES))
