@@ -55,17 +55,25 @@ function(extract_hwlib_arguments path)
             set(MAKE_CONSOLE_BAUDRATE "${MAKE_CONSOLE_BAUDRATE}" PARENT_SCOPE)
         endif ()
     endif ()
+    if (ln GREATER 4)
+        list(GET ARGN 4 NO_MAKEFILE)
+        set(NO_MAKEFILE ${NO_MAKEFILE} PARENT_SCOPE)
+    endif ()
 endfunction()
 
 function(create_target name path use_hwlib)
     if (use_hwlib)
 
+
         add_custom_command(OUTPUT "${name}_command_output.cpp"
+                COMMAND "${MAKE_BAT}" -f "${path}/Makefile" clean
                 COMMAND "${MAKE_BAT}" -f "${path}/Makefile"
                 #                COMMAND echo "test" > "${name}_command_output.cpp"
                 WORKING_DIRECTORY "${path}"
+                USES_TERMINAL
                 COMMENT "Running makefile in WSL"
                 )
+
         add_executable(
                 ${name}
                 "${name}_command_output.cpp")
@@ -143,8 +151,9 @@ function(add_hwlib_target TARGET_NAME path)
 
     string(REPLACE ";" " " MAKE_SOURCES "${MAINSOURCES_RELATIVE}")
     message("-- Sources: ${MAKE_SOURCES}")
+    if(NOT ${NO_MAKEFILE})
     configure_file(${HWLIB_TOOL_DIR}/Makefile.convert ${path}/Makefile)
-
+    endif()
     target_sources(${TARGET_NAME} PRIVATE ${MAINSOURCES_ABSOLUTE} ${SOURCES} "${path}/main.cpp")
 
     if (HWLIB_TARGET)

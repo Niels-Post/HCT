@@ -41,3 +41,4 @@ include $(BMPTK)/Makefile.inc
 
 debugtarget:
 	$(info    $(DEFINES))
+
