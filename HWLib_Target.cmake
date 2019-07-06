@@ -3,16 +3,15 @@ cmake_minimum_required(VERSION 2.8)
 
 set(HWLIB_TOOL_DIR "${CMAKE_CURRENT_LIST_DIR}")
 set(WSL_HOMEDIR "${HWLIB_TOOL_DIR}/..")
-
+set(HWLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/hwlib/library)
+set(BMPTK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/bmptk)
+set(SFML_DIR ${WSL_HOMEDIR}/SFML)
+set(CATCH_DIR ${CMAKE_CURRENT_SOURCE_DIR}/submodules/catch2/single_include/catch2)
 if (POLICY CMP0076)
     cmake_policy(SET CMP0076 NEW)
 endif ()
 
-set(HWLIB_DIR ${WSL_HOMEDIR}/hwlib/library)
-set(BMPTK_DIR ${WSL_HOMEDIR}/bmptk)
-set(SFML_DIR ${HWLIB_TOOL_DIR}/SFML)
-set(CATCH_DIR ${WSL_HOMEDIR}/Catch2/single_include/catch2)
-set(MAKE_BAT "${HWLIB_TOOL_DIR}/run_make.bat")
+
 
 set(CATCH_MAKE_DIRECTIVE "SEARCH += $(HOME)/Catch2/single_include\nSEARCH += $(HOME)/Catch2/single_include/catch2")
 
@@ -77,7 +76,6 @@ function(create_target name path use_hwlib)
         add_executable(
                 ${name}
                 "${name}_command_output.cpp")
-        #        add_dependencies(${name} "${name}_command_output.o")
     else ()
         add_executable(${TARGET_NAME} "${path}/main.cpp")
     endif ()
@@ -154,7 +152,7 @@ function(add_hwlib_target TARGET_NAME path)
     if(NOT ${NO_MAKEFILE})
     configure_file(${HWLIB_TOOL_DIR}/Makefile.convert ${path}/Makefile)
     endif()
-    target_sources(${TARGET_NAME} PRIVATE ${MAINSOURCES_ABSOLUTE} ${SOURCES} "${path}/main.cpp")
+    target_sources(${TARGET_NAME} PRIVATE ${MAINSOURCES_ABSOLUTE} ${SOURCES})
 
     if (HWLIB_TARGET)
         retrieve_bmptk_definitions(${path})

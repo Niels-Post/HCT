@@ -16,9 +16,9 @@ IF "%~1" == "" (set "maketarget=run") else (set "maketarget=%1")
 shift
 
 IF "%maketarget%"=="clean" (
-C:\Windows\Sysnative\wsl export DISPLAY=localhost:0.0; cd %working_dir%; make -f %makefile% %maketarget%; exit; > NUL
+wsl export DISPLAY=localhost:0.0; cd %working_dir%; make -f %makefile% %maketarget%; exit; > NUL
 ) ELSE (
-C:\Windows\Sysnative\wsl export DISPLAY=localhost:0.0; cd %working_dir%; make -f %makefile% %maketarget%; exit;
+wsl export DISPLAY=localhost:0.0; cd %working_dir%; make -f %makefile% %maketarget%; exit;
 )
 
 
