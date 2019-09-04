@@ -82,7 +82,7 @@ function(create_target name path use_hwlib)
 endfunction()
 
 function(get_mainsources path)
-    file(GLOB_RECURSE absolute_sources ${path}/*.cpp)
+    file(GLOB_RECURSE absolute_sources ${path}/*.cpp ${path}/*.asm)
     list(FILTER absolute_sources EXCLUDE REGEX .*main.cpp)
 
     foreach (abssource ${absolute_sources})

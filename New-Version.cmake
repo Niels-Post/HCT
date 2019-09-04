@@ -1,14 +1,18 @@
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 
-set(MAKE_BAT "${WSL_HOMEDIR}/run_make.bat")
-
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 function(make_output path makefile target)
     execute_process(
-            COMMAND C:/Windows/Sysnative/wsl "make" -f "${makefile}" ${target}
+            COMMAND "make" -f "${makefile}" ${target}
             WORKING_DIRECTORY "${path}"
             OUTPUT_VARIABLE OutVar)
-
     string(REPLACE "\n" ";" OutVar ${OutVar})
     list(GET OutVar 0 result)
     SET(output "${result}" PARENT_SCOPE)
@@ -21,11 +25,62 @@ function(get_defines path makefile)
     set(defines "${Defines}" PARENT_SCOPE)
 endfunction()
 
+function(get_common_flags path makefile)
+    make_output(${path} ${makefile} get_common_flags)
+        set(all_flags "")
+    STRING(REPLACE " " ";" nospaces "${output}")
+    foreach (f ${nospaces})
+        if (NOT "${f}" MATCHES -I)
+            list(APPEND all_flags "${f}")
+        else ()
+        endif ()
+    endforeach ()
+    string(REPLACE ";" " " all_flags "${all_flags}")
+    set(common_flags ${all_flags} PARENT_SCOPE)
+endfunction()
+
+function(get_c_flags path makefile)
+    make_output(${path} ${makefile} get_c_flags)
+    set(c_flags ${output} PARENT_SCOPE)
+endfunction()
+
+function(get_as_flags path makefile)
+    make_output(${path} ${makefile} get_as_flags)
+    set(as_flags ${output} PARENT_SCOPE)
+endfunction()
+
+function(get_ln_flags path makefile)
+    make_output(${path} ${makefile} get_ln_flags)
+    set(ln_flags ${output} PARENT_SCOPE)
+endfunction()
+
+function(get_cpp_flags path makefile)
+    make_output(${path} ${makefile} get_cpp_flags)
+    set(cpp_flags ${output} PARENT_SCOPE)
+endfunction()
+
+function(get_prefix path makefile)
+    make_output(${path} ${makefile} get_prefix)
+    set(prefix ${output} PARENT_SCOPE)
+endfunction()
+
+
+
 function(get_search path makefile)
     make_output(${path} ${makefile} get_search)
     string(REPLACE "./" "" nosingledots "${output}")
+    string(PREPEND nosingledots "../")
     STRING(REPLACE " " ";" nospaces "${nosingledots}")
     set(search "${nospaces}" PARENT_SCOPE)
+endfunction()
+
+
+function(get_includes path makefile)
+    make_output(${path} ${makefile} get_includes)
+    string(REPLACE "./" "" nosingledots "${output}")
+    string(REPLACE "-I" "" noi "${nosingledots}")
+    STRING(REPLACE " " ";" nospaces "${noi}")
+    set(includes "${nospaces}" PARENT_SCOPE)
 endfunction()
 
 function(get_sources path makefile search)
@@ -47,18 +102,36 @@ function(get_sources path makefile search)
 endfunction()
 
 
-function(add_hwlib_bmptk_target name path makefile)
-    add_executable(${name})
-    get_defines("${path}" "${makefile}")
-    message("Defines: " "${defines}")
-    target_compile_definitions(${name} PRIVATE ${defines})
+macro(add_hwlib_bmptk_target name path makefile)
+    add_executable(${name} ${path}/main.cpp)
+    get_common_flags(${path} ${makefile})
+    get_c_flags(${path} ${makefile})
+    set(CMAKE_C_FLAGS "${c_flags} ${common_flags}")
+    get_cpp_flags(${path} ${makefile})
+    set(CMAKE_CXX_FLAGS  "${common_flags} ${cpp_flags}")
+    get_as_flags(${path} ${makefile})
+    set(CMAKE_ASM_FLAGS  "${common_flags} ${as_flags}")
+    get_ln_flags(${path} ${makefile})
+    set(CMAKE_EXE_LINKER_FLAGS "${common_flags} ${ln_flags}")
+    set(CMAKE_MODULE_LINKER_FLAGS "${common_flags} ${ln_flags}")
+    get_prefix(${path} ${makefile})
+    SET(CMAKE_CXX_COMPILER ${prefix}g++)
+    SET(CMAKE_C_COMPILER ${prefix}gcc)
+    SET(CMAKE_ASM_COMPILER ${prefix}gcc)
+
+    set_property(TARGET ${name} PROPERTY CXX_STANDARD 17)
+    set_property(TARGET ${name} PROPERTY C_STANDARD 11)
+
+    message(${common_flags})
     get_search("${path}" "${makefile}")
-    message("Search: " "${search}")
+    get_includes("${path}" "${makefile}")
+    list(APPEND search "${includes}")
+    message("Search: " "${ln_flags}")
     list(APPEND CMAKE_INCLUDE_PATH ${search})
     target_include_directories(${name} PRIVATE ${search})
-    target_include_directories(${name} PRIVATE ${WSL_HOMEDIR}/SFML)
+#    target_include_directories(${name} PRIVATE ${WSL_HOMEDIR}/SFML)
     get_sources("${path}" "${makefile}" "${search}")
     message("Sources: " "${sources}")
     target_sources(${name} PRIVATE ${sources})
 
-endfunction()
+endmacro()
