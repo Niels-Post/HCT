@@ -27,6 +27,14 @@ get_common_flags:
 get_ln_flags:
 	$(info $(LN_FLAGS))
 
+get_ld_flags:
+	$(info $(LDFLAGS))
+
+get_ln_script:
+	$(info $(LINKERSCRIPT))
+
+make_ln_script: $(LINKERSCRIPT)
+
 as_only_flags := $(AS_LANGUAGE) $(TARGET_AS_FLAGS)  $(PROJECT_AS_FLAGS)
 
 get_as_flags:
