@@ -6,13 +6,14 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 
 function(get_make_output path makefile target output)
     execute_process(
-            COMMAND "make" -f "${makefile}" ${target}
+            COMMAND bash -c "cat '${makefile}' '${HCT}/Makefile.inc' > '${makefile}.HCT' &&  make -f '${makefile}.HCT' '${target}'"
             WORKING_DIRECTORY "${path}"
-            OUTPUT_VARIABLE OutVar)
+            OUTPUT_VARIABLE OutVar
+            INPUT_FILE "${makefile}")
     string(REPLACE "\n" ";" OutVar ${OutVar})
     list(GET OutVar 0 result)
     SET(${output} "${result}" PARENT_SCOPE)
@@ -56,8 +57,9 @@ function(get_sources path makefile search)
             else()
             set(a a-NOTFOUND)
             find_file(a "${f}" PATHS ${search_paths})
-            message(${a} ${f})
-            file(RELATIVE_PATH relative ${path} ${a})
+            message(${f})
+            file(RELATIVE_PATH relative ${CMAKE_CURRENT_BINARY_DIR} ${a})
+            message(${relative})
             list(APPEND all_sources "${relative}")
         endif ()
 
@@ -68,7 +70,7 @@ endfunction()
 
 macro(add_hwlib_bmptk_target name path makefile)
     # Create executable and set default values
-    add_executable(${name} ${path}/main.cpp)
+    add_library(${name} OBJECT ${path}/main.cpp)
     set_property(TARGET ${name} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${name} PROPERTY C_STANDARD 11)
 
@@ -88,6 +90,8 @@ macro(add_hwlib_bmptk_target name path makefile)
     get_make_output(${path} ${makefile} get_c_flags c_flags)
     get_make_output(${path} ${makefile} get_cpp_flags cpp_flags)
     get_make_output(${path} ${makefile} get_as_flags as_flags)
+
+        message("${common_flags}")
 
     set(CMAKE_C_FLAGS "${c_flags} ${common_flags}")
     set(CMAKE_CXX_FLAGS  "${common_flags} ${cpp_flags}")
@@ -111,22 +115,27 @@ macro(add_hwlib_bmptk_target name path makefile)
     # Retrieve includes
     get_includes("${path}" "${makefile}")
     list(APPEND search "${includes}")
+    list(APPEND search "${path}")
     list(APPEND CMAKE_INCLUDE_PATH ${search})
     target_include_directories(${name} PRIVATE ${search})
 #    target_include_directories(${name} PRIVATE ${WSL_HOMEDIR}/SFML)
     get_sources("${path}" "${makefile}" "${search}")
-    message("Sources: " "${sources}")
+
     target_sources(${name} PUBLIC ${sources})
 
     get_make_output(${path} ${makefile} get_ln_script ln_script)
     #    get_target_property(_cur_link_deps ${name} LINK_DEPENDS)
     #    string(APPEND _cur_link_deps " ${ln_template}")
-    add_custom_target(${name}_linker "make" -f "${makefile}" make_ln_script
-            WORKING_DIRECTORY "${path}")
-    add_dependencies(${name} ${name}_linker)
+    add_custom_target(${name}_builder bash -c "make -f '${makefile}' run || exit 0"
+            WORKING_DIRECTORY "${path}"
+            VERBATIM)
+    execute_process(COMMAND bash -c "echo '#!/bin/bash' > ${CMAKE_CURRENT_BINARY_DIR}/${name}")
+    add_dependencies(${name} ${name}_builder)
     #    set_target_properties(${name} PROPERTIES LINK_DEPENDS "${path}/${ln_script}")
 
     get_make_output(${path} ${makefile} get_ld_flags ldflags)
     string(REPLACE "${ln_script}" "${path}/${ln_script}" ld_flags "${ldflags}")
     string(APPEND CMAKE_EXE_LINKER_FLAGS ${ld_flags})
+    message("Target loaded: ${name}")
+
 endmacro()
