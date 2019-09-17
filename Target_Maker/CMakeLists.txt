@@ -10,7 +10,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 function(get_make_output path makefile target output)
     execute_process(
-            COMMAND bash -c "cat '${makefile}' '${HCT}/Makefile.inc' > '${makefile}.HCT' &&  make -f '${makefile}.HCT' '${target}'"
+            COMMAND bash -c "cat '${makefile}' '${HCT}/Makefile.inc' > '${makefile}.HCT' &&  make -f '${makefile}.HCT' '${target}' HWLIB=${HWLIB} BMPTK=${BMPTK} "
             WORKING_DIRECTORY "${path}"
             OUTPUT_VARIABLE OutVar
             INPUT_FILE "${makefile}")
@@ -125,7 +125,7 @@ target_sources(${name} PUBLIC ${sources})
 get_make_output(${path} ${makefile} get_ln_script ln_script)
 #    get_target_property(_cur_link_deps ${name} LINK_DEPENDS)
 #    string(APPEND _cur_link_deps " ${ln_template}")
-add_custom_target(${name}_builder bash -c "make -f '${makefile}' run || exit 0"
+add_custom_target(${name}_builder bash -c "make -f '${makefile}' run HWLIB=${HWLIB} BMPTK=${BMPTK} || exit 0"
         WORKING_DIRECTORY "${path}"
         VERBATIM)
 execute_process(COMMAND bash -c "echo '#!/bin/bash' > ${CMAKE_CURRENT_BINARY_DIR}/${name}")
