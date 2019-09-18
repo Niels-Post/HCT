@@ -6,6 +6,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
+
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
 function(get_make_output path makefile target output)
@@ -54,11 +55,16 @@ function(get_sources path makefile search)
         if ("${f}" MATCHES [\/])
             list(APPEND all_sources "${f}")
         elseif ("${f}" MATCHES "main.cpp")
-        else()
+        else ()
             set(a a-NOTFOUND)
             find_file(a "${f}" PATHS ${search_paths})
-            file(RELATIVE_PATH relative ${CMAKE_CURRENT_BINARY_DIR} ${a})
-            list(APPEND all_sources "${relative}")
+            if ("${a}" MATCHES a-NOTFOUND)
+                message(SEND_ERROR "File: ${f} was not found in ${search_paths}")
+            else ()
+                message(STATUS "File ${f} found as ${a}")
+                file(RELATIVE_PATH relative ${CMAKE_CURRENT_BINARY_DIR} ${a})
+                list(APPEND all_sources "${relative}")
+            endif ()
         endif ()
 
     endforeach ()
@@ -92,9 +98,9 @@ get_make_output(${path} ${makefile} get_as_flags as_flags)
 
 #target_compile_options(${name} PRIVATE "${c_flags} ${cpp_flags} ${as_flags} ${common_flags}")
 
-    set(CMAKE_C_FLAGS "${c_flags} ${common_flags}")
-    set(CMAKE_CXX_FLAGS  "${common_flags} ${cpp_flags}")
-    set(CMAKE_ASM_FLAGS  "${common_flags} ${as_flags}")
+set(CMAKE_C_FLAGS "${c_flags} ${common_flags}")
+set(CMAKE_CXX_FLAGS "${common_flags} ${cpp_flags}")
+set(CMAKE_ASM_FLAGS "${common_flags} ${as_flags}")
 
 # Retrieve and set Linker flags
 get_make_output(${path} ${makefile} get_ln_flags ln_flags)
@@ -110,7 +116,6 @@ SET(CMAKE_C_COMPILER ${prefix}gcc)
 SET(CMAKE_ASM_COMPILER ${prefix}gcc)
 
 
-
 # Retrieve includes
 get_includes("${path}" "${makefile}")
 list(APPEND search "${includes}")
@@ -118,6 +123,8 @@ list(APPEND search "${path}")
 list(APPEND CMAKE_INCLUDE_PATH ${search})
 target_include_directories(${name} PRIVATE ${search})
 #    target_include_directories(${name} PRIVATE ${WSL_HOMEDIR}/SFML)
+
+message("\n Looking for source for ${name}")
 get_sources("${path}" "${makefile}" "${search}")
 
 target_sources(${name} PUBLIC ${sources})
@@ -125,7 +132,7 @@ target_sources(${name} PUBLIC ${sources})
 get_make_output(${path} ${makefile} get_ln_script ln_script)
 #    get_target_property(_cur_link_deps ${name} LINK_DEPENDS)
 #    string(APPEND _cur_link_deps " ${ln_template}")
-add_custom_target(${name}_builder bash -c "make -f '${makefile}' run HWLIB=${HWLIB} BMPTK=${BMPTK} || exit 0"
+add_custom_target(${name}_builder bash -c "sudo make -f '${makefile}' run HWLIB=${HWLIB} BMPTK=${BMPTK} || exit 0"
         WORKING_DIRECTORY "${path}"
         VERBATIM)
 execute_process(COMMAND bash -c "echo '#!/bin/bash' > ${CMAKE_CURRENT_BINARY_DIR}/${name}")
@@ -135,4 +142,6 @@ add_dependencies(${name} ${name}_builder)
 get_make_output(${path} ${makefile} get_ld_flags ldflags)
 string(REPLACE "${ln_script}" "${path}/${ln_script}" ld_flags "${ldflags}")
 string(APPEND CMAKE_EXE_LINKER_FLAGS ${ld_flags})
-message("Target loaded: ${name}")
+message(STATUS "Target loaded: ${name}")
+
+message("------------------------------")
