@@ -130,7 +130,7 @@ target_sources("${name}" PUBLIC "${sources}")
 
 add_custom_target("${name}_builder" bash -c "sudo make -f '${makefile}' run || exit 0"
         WORKING_DIRECTORY "${path}"
-        VERBATIM)
+        VERBATIM USES_TERMINAL)
 add_dependencies("${name}" "${name}_builder")
 #    set_target_properties(${name} PROPERTIES LINK_DEPENDS "${path}/${ln_script}")
 
