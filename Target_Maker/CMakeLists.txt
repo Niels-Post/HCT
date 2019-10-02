@@ -11,7 +11,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 function(get_make_output path makefile target output)
     execute_process(
-            COMMAND bash -c "cat '${makefile}' '${HCT}/Makefile.inc' > '${makefile}.HCT' &&  make -f '${makefile}.HCT' '${target}' "
+            COMMAND bash -c "cat '${makefile}' '$ENV{HCT}/Makefile.inc' > '${makefile}.HCT' &&  make -f '${makefile}.HCT' '${target}' "
             WORKING_DIRECTORY "${path}"
             OUTPUT_VARIABLE OutVar
             INPUT_FILE "${makefile}")
@@ -72,7 +72,12 @@ endfunction()
 
 get_project_main("${path}" "${makefile}")
 
-add_library(${name} OBJECT ${path}/${project_main}.cpp)
+add_custom_command(OUTPUT test.txt
+        COMMAND bash -c "sudo make -f '${makefile}' run || exit 0"
+        WORKING_DIRECTORY "${path}"
+        VERBATIM USES_TERMINAL)
+
+add_library(${name} OBJECT ${path}/${project_main}.cpp test.txt)
 
 #set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_STANDARD 11)
@@ -122,17 +127,30 @@ string(APPEND CMAKE_INCLUDE_PATH "${search}")
 target_include_directories(${name} PRIVATE "${search}")
 #    target_include_directories(${name} PRIVATE ${WSL_HOMEDIR}/SFML)
 
-message("\n Looking for source for ${name}")
+message("Looking for source for ${name}")
 get_sources("${path}" "${makefile}" "${search}" "${project_main}")
 
 
 target_sources("${name}" PUBLIC "${sources}")
+#
+#add_custom_target("${name}_builder" bash -c "sudo make -f '${makefile}' run || exit 0"
+#        WORKING_DIRECTORY "${path}"
+#        VERBATIM USES_TERMINAL)
 
-add_custom_target("${name}_builder" bash -c "sudo make -f '${makefile}' run || exit 0"
-        WORKING_DIRECTORY "${path}"
-        VERBATIM USES_TERMINAL)
-add_dependencies("${name}" "${name}_builder")
+
+
+
+#add_custom_command(TARGET <target>
+#        PRE_BUILD | PRE_LINK | POST_BUILD
+#        COMMAND command1 [ARGS] [args1...]
+#        [COMMAND command2 [ARGS] [args2...] ...]
+#        [BYPRODUCTS [files...]]
+#        [WORKING_DIRECTORY dir]
+#        [COMMENT comment]
+#        [VERBATIM] [USES_TERMINAL])
+
+#add_dependencies("${name}" "${name}_builder")
 #    set_target_properties(${name} PROPERTIES LINK_DEPENDS "${path}/${ln_script}")
 
 message(STATUS "Target loaded: ${name}")
-message("------------------------------")
+message("------------------------------\n\n")
