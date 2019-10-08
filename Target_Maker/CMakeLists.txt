@@ -11,7 +11,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 function(get_make_output path makefile target output)
     execute_process(
-            COMMAND bash -c "cat '${makefile}' '$ENV{HCT}/Makefile.inc' > '${makefile}.HCT' &&  make -f '${makefile}.HCT' '${target}' "
+            COMMAND bash -c "sudo cat '${makefile}' '$ENV{HCT}/Makefile.inc' > '${makefile}.HCT' && sudo make -f '${makefile}.HCT' '${target}' "
             WORKING_DIRECTORY "${path}"
             OUTPUT_VARIABLE OutVar
             INPUT_FILE "${makefile}")
