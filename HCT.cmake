@@ -22,7 +22,7 @@ function(hct_autoload directory)
         endif ()
 
         message("\nMakefile found in: ${makefile_directorypath}")
-        add_hwlib_bmptk_target("${makefile_directoryname}" "${makefile_directorypath}" "${makefile_name}")
+        hct_add("${makefile_directoryname}" "${makefile_directorypath}" "${makefile_name}")
     endforeach ()
 
 endfunction()
