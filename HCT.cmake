@@ -1,4 +1,4 @@
-function(add_hwlib_bmptk_target name path makefile)
+function(hct_add name path makefile)
     set(name ${name})
     set(path ${path})
     set(makefile ${makefile})
@@ -6,7 +6,7 @@ function(add_hwlib_bmptk_target name path makefile)
 endfunction()
 
 
-function(autoload_hwlib_bmptk_targets directory)
+function(hct_autoload directory)
     file(GLOB_RECURSE makefiles
             "${directory}/*Makefile")
     foreach (makefile ${makefiles})
