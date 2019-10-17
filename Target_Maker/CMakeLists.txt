@@ -9,9 +9,11 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+
+
 function(get_make_output path makefile target output)
     execute_process(
-            COMMAND bash -c "sudo cat '${makefile}' '$ENV{HCT}/Makefile.inc' > '${makefile}.HCT' && sudo make -f '${makefile}.HCT' '${target}' "
+            COMMAND bash -c "cat '${makefile}' '$ENV{HCT}/Makefile.inc' > '${makefile}.HCT' && make -f '${makefile}.HCT' '${target}' "
             WORKING_DIRECTORY "${path}"
             OUTPUT_VARIABLE OutVar
             INPUT_FILE "${makefile}")
@@ -79,10 +81,6 @@ add_custom_command(OUTPUT test.txt
 
 add_library(${name} OBJECT ${path}/${project_main}.cpp test.txt)
 
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD 11)
-set_property(TARGET ${name} PROPERTY CXX_STANDARD 17)
-set_property(TARGET ${name} PROPERTY C_STANDARD 11)
 
 # Retrieve Common Flags
 get_make_output(${path} ${makefile} get_common_flags common_flags_output)

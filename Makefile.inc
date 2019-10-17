@@ -1,4 +1,9 @@
 
+
+%.list:
+	$(info $(foreach el,$($*),$(el);))
+
+
 listify = $(info $(foreach el,$(1),$(el);))
 
 get_sources:
