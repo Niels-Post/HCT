@@ -52,6 +52,7 @@ function(get_sources path makefile search project_main)
     get_make_output("${path}" "${makefile}" get_sources output)
     set(all_sources "")
     foreach (f ${output})
+	message(STATUS "File: \"${f}\"") # <--
         if ("${f}" MATCHES ^\/)
             list(APPEND all_sources "${f}")
         elseif ("${f}" MATCHES "(^${project_main}.cpp$)")
