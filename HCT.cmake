@@ -16,8 +16,8 @@ function(hct_autoload directory)
 
         file(READ ${makefile} makefile_contents)
         string(FIND "${makefile_contents}" "include $(HWLIB)" is_hwlib_makefile)
-
-        if (${is_hwlib_makefile} EQUAL -1)
+        string(FIND "${makefile_contents}" "#HCTMarker" is_hct_marked)
+        if (${is_hwlib_makefile} EQUAL -1 AND ${is_hct_marked} EQUAL -1)
             continue()
         endif ()
 
