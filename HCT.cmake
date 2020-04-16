@@ -1,4 +1,5 @@
 function(hct_add name path makefile)
+    string(REPLACE = "_eq" name "${name}")
     set(name ${name})
     set(path ${path})
     set(makefile ${makefile})
@@ -15,9 +16,10 @@ function(hct_autoload directory)
         get_filename_component(makefile_directoryname "${makefile_directorypath}" NAME)
 
         file(READ ${makefile} makefile_contents)
-        string(FIND "${makefile_contents}" "include $(HWLIB)" is_hwlib_makefile)
+        string(FIND "${makefile_contents}" "$(HWLIB)/makefile.inc" is_hwlib_makefile)
+        string(FIND "${makefile_contents}" "$(RELATIVE)/Makefile." is_relative_makefile)
         string(FIND "${makefile_contents}" "#HCTMarker" is_hct_marked)
-        if (${is_hwlib_makefile} EQUAL -1 AND ${is_hct_marked} EQUAL -1)
+        if (${is_hwlib_makefile} EQUAL -1 AND ${is_hct_marked} EQUAL -1 AND ${is_relative_makefile} EQUAL -1)
             continue()
         endif ()
 
