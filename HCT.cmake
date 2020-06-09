@@ -1,9 +1,13 @@
+set(HCT $ENV{HU_ROOT_DIR}\\HCT)
+
+
+
 function(hct_add name path makefile)
     string(REPLACE = "_eq" name "${name}")
     set(name ${name})
     set(path ${path})
     set(makefile ${makefile})
-    add_subdirectory("$ENV{HCT}/Target_Maker" "${CMAKE_CURRENT_BINARY_DIR}/HCT/${name}" EXCLUDE_FROM_ALL)
+    add_subdirectory("${HCT}/Target_Maker" "${CMAKE_CURRENT_BINARY_DIR}/HCT/${name}" EXCLUDE_FROM_ALL)
 endfunction()
 
 

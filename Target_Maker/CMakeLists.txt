@@ -13,10 +13,19 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 function(get_make_output path makefile target output)
     execute_process(
-            COMMAND bash -c "cat '${makefile}' '$ENV{HCT}/Makefile.inc' > '${makefile}.HCT' && make -f '${makefile}.HCT' '${target}' "
+            COMMAND cmd.exe /C type "${makefile}" > "${makefile}.HCT" && type "${HCT}\\Makefile.inc" >> "${makefile}.HCT" && make -f "${makefile}.HCT" "${target}"
             WORKING_DIRECTORY "${path}"
             OUTPUT_VARIABLE OutVar
             INPUT_FILE "${makefile}")
+#        message("path " "${path}")
+#        message("cmd " "cmd.exe /C type \"${makefile}\" > \"${makefile}.HCT\" && type \"${HCT}\\Makefile.inc\" >> \"${makefile}.HCT\" && make -f \"${makefile}.HCT\" \"${target}\"")
+#        message("vblehbsdvb" "${ErrVar}")
+#        message("vblehbsdvb" "${OutVar}")
+#    execute_process(
+#            COMMAND bash -c "cat '${makefile}' '$ENV{HCT}/Makefile.inc' > '${makefile}.HCT' && make -f '${makefile}.HCT' '${target}' "
+#            WORKING_DIRECTORY "${path}"
+#            OUTPUT_VARIABLE OutVar
+#            INPUT_FILE "${makefile}")
     string(REPLACE "; " ";" OutVar "${OutVar}")
 
 
@@ -76,7 +85,7 @@ endfunction()
 get_project_main("${path}" "${makefile}")
 
 add_custom_command(OUTPUT test.txt
-        COMMAND bash -c "sudo make -f '${makefile}' run || exit 0"
+        COMMAND make -f "${makefile}" run || exit 0
         WORKING_DIRECTORY "${path}"
         VERBATIM USES_TERMINAL)
 
@@ -113,7 +122,9 @@ set(CMAKE_CXX_FLAGS "${common_flags} ${cpp_flags}")
 set(CMAKE_ASM_FLAGS "${common_flags} ${as_flags}")
 # Set correct compiler
 get_make_output(${path} ${makefile} get_prefix prefix)
+set(prefix "..\\..\\${prefix}")
 SET(CMAKE_CXX_COMPILER ${prefix}g++)
+#message("Compil" ${CMAKE_CXX_COMPILER})
 SET(CMAKE_C_COMPILER ${prefix}gcc)
 SET(CMAKE_ASM_COMPILER ${prefix}gcc)
 
