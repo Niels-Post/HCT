@@ -2,6 +2,6 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-
-include($ENV{HCT}/HCT.cmake)
+set(HCT $ENV{HU_ROOT_DIR}/HCT)
+include(${HCT}/HCT.cmake)
 hct_autoload(${CMAKE_CURRENT_SOURCE_DIR})
