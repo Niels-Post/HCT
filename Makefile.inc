@@ -1,42 +1,20 @@
+# The contents of this makefile can be added at the end of any makefile to help extract its final parameters
 
 
+# Extract all flags set by BMPTK
+commonflags := $(COMMON) $(LIBS)
+all_c_flags := $(C_LANGUAGE) $(TARGET_C_FLAGS) $(PROJECT_C_FLAGS)
+all_cpp_flags := $(CPP_LANGUAGE) $(CPP_RTTI) $(CPP_EXCEPTIONS) $(CPP_THREADSAFE) $(CPP_CXA) $(TARGET_CPP_FLAGS) $(PROJECT_CPP_FLAGS)
+
+
+# Output the contents of a list variable, separated by semicolons
 %.list:
 	$(info $(foreach el,$($*),$(el);))
 
-
 listify = $(info $(foreach el,$(1),$(el);))
 
-get_sources:
-	$(call listify,$(SOURCES))
+# Output the contents of a single variable
+%.var:
+	$(info $($*))
 
-
-get_includes:
-	$(call listify,$(INCLUDES))
-
-
-
-commonflags := $(COMMON) $(LIBS)
-get_common_flags:
-	$(call listify,$(commonflags))
-
-get_project:
-	$(info $(PROJECT))
-
-
-get_as_flags:
-	$(call listify,$(all_as_flags))
-
-c_only_flags := $(C_LANGUAGE) $(TARGET_C_FLAGS) $(PROJECT_C_FLAGS)
-
-get_c_flags:
-	$(call listify,$(c_only_flags))
-
-cpp_only_flags := $(CPP_LANGUAGE) $(CPP_RTTI) $(CPP_EXCEPTIONS) $(CPP_THREADSAFE) $(CPP_CXA) $(TARGET_CPP_FLAGS) $(PROJECT_CPP_FLAGS)
-
-get_cpp_flags:
-	$(call listify,$(cpp_only_flags))
-
-
-get_prefix:
-	$(info $(PREFIX))
 
