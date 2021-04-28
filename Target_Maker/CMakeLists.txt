@@ -10,6 +10,16 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 
+set(CMD_EXE cmd.exe)
+
+if (NOT EXISTS ${CMD_EXE})
+    if (EXISTS C:/Windows/System32/cmd.exe)
+        set(CMD_EXE C:/Windows/System32/cmd.exe)
+    else ()
+        set(CMD_EXE C:/Windows/SysWOW64/cmd.exe)
+    endif ()
+endif ()
+
 # Runs a target for a specific makefile and reads the output
 # Path: Directory the makefile is in
 # Makefile: Name of the makefile
@@ -21,6 +31,7 @@ function(get_make_output path makefile target output)
             WORKING_DIRECTORY "${path}"
             OUTPUT_VARIABLE OutVar
             INPUT_FILE "${makefile}")
+
     string(REPLACE "; " ";" OutVar "${OutVar}")
 
     if (OutVar MATCHES ^\n)
@@ -55,9 +66,9 @@ function(get_sources path makefile search project_main)
         # If the source is an absolute path no change is needed
         if ("${f}" MATCHES ^\/ OR "${f}" MATCHES ^.:)
             list(APPEND all_sources "${f}")
-        # the Project main does not need to be added twice
+            # the Project main does not need to be added twice
         elseif ("${f}" MATCHES "(^${project_main}.cpp$)")
-        # For all other files, find the path relative to the output dir
+            # For all other files, find the path relative to the output dir
         else ()
             set(a a-NOTFOUND)
             find_file(a "${f}" PATHS ${search_paths})
@@ -81,7 +92,7 @@ get_project_main("${path}" "${makefile}")
 # To generate a fake file, we just need to build and run the project using make
 # (This way, we can use the build button in CLion to run)
 add_custom_command(OUTPUT FAKE_FILE_TO_TRICK_CMAKE_INTO_RUNNING_COMMAND_PRE_BUILD.txt
-        COMMAND cmd /c "bmptk-make -f ${makefile} run || exit 0"
+        COMMAND  ${CMD_EXE} /c "bmptk-make -f ${makefile} run || exit 0"
         WORKING_DIRECTORY "${path}"
         VERBATIM USES_TERMINAL)
 
@@ -122,9 +133,9 @@ set(CMAKE_ASM_FLAGS "${common_flags} ${as_flags}")
 # Set correct compiler
 get_make_output(${path} ${makefile} PREFIX.var prefix)
 GET_FILENAME_COMPONENT(prefix_path "${prefix}" REALPATH BASE_DIR "${path}")
-if(NOT ${prefix_path} MATCHES "-$")
+if (NOT ${prefix_path} MATCHES "-$")
     set(prefix_path "${prefix_path}/")
-endif()
+endif ()
 SET(CMAKE_CXX_COMPILER ${prefix_path}g++)
 SET(CMAKE_C_COMPILER ${prefix_path}gcc)
 SET(CMAKE_ASM_COMPILER ${prefix_path}gcc)
